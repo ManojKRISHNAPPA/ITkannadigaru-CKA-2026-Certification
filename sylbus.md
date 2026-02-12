@@ -5,7 +5,6 @@
 ## 1. Kubernetes Objects
 
 1. **Pods**
-
    * Single-container Pods
    * Multi-container Pods
    * Init Containers

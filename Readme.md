@@ -42,5 +42,4 @@ How to deploy a statefulset
 How to deploy a replica set
 # Day 9 :
 
-
-    
+this is called end to end
