@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: manoj-1
+  name: manoj-1
+spec:
+  containers:
+  - image: nginx
+    name: manoj-1
+
