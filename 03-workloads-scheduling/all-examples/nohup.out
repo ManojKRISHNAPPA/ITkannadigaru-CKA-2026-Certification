@@ -1,0 +1,21 @@
+Forwarding from 127.0.0.1:8080 -> 80
+Forwarding from [::1]:8080 -> 80
+Handling connection for 8080
+Forwarding from 127.0.0.1:8081 -> 80
+Forwarding from [::1]:8081 -> 80
+Handling connection for 8081
+Handling connection for 8080
+Forwarding from 127.0.0.1:8080 -> 80
+Forwarding from [::1]:8080 -> 80
+Handling connection for 8080
+Handling connection for 8080
+Handling connection for 8080
+E0410 17:25:36.828231   27379 portforward.go:424] "Unhandled Error" err="an error occurred forwarding 8080 -> 80: error forwarding port 80 to pod 8e68ca721e6e489c1ed0ae1d1f2b53f81997afae218d5e9951df92b7db4b2240, uid : failed to find sandbox \"8e68ca721e6e489c1ed0ae1d1f2b53f81997afae218d5e9951df92b7db4b2240\" in store: not found"
+error: lost connection to pod
+error: timed out waiting for the condition
+Error from server (NotFound): deployments.apps "web-blue" not found
+Forwarding from 127.0.0.1:8080 -> 80
+Forwarding from [::1]:8080 -> 80
+Forwarding from 127.0.0.1:8080 -> 80
+Forwarding from [::1]:8080 -> 80
+Handling connection for 8080
