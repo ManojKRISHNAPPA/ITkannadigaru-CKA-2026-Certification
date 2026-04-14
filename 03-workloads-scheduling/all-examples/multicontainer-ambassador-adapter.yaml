@@ -1,0 +1,55 @@
+# ─────────────────────────────────────────────────────────
+# AMBASSADOR PATTERN — App + Proxy
+# App always connects to localhost; ambassador routes to real target
+# ─────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-with-ambassador
+  labels:
+    app: myapp
+    pattern: ambassador
+spec:
+  containers:
+  # Main application — always talks to localhost
+  - name: app
+    image: busybox
+    command: ['sh', '-c', 'while true; do wget -qO- localhost:9000; sleep 5; done']
+
+  # Ambassador proxy — receives on 9000, routes to external service
+  - name: ambassador
+    image: nginx:1.25
+    ports:
+    - containerPort: 9000
+    # In real use: Nginx/Envoy/HAProxy configured to forward to backend
+
+---
+# ─────────────────────────────────────────────────────────
+# ADAPTER PATTERN — App + Metrics Exporter
+# App exposes non-standard metrics; adapter converts to Prometheus format
+# ─────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-with-adapter
+  labels:
+    app: myapp
+    pattern: adapter
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9113"
+spec:
+  containers:
+  # Main app — exposes metrics in non-Prometheus format
+  - name: app
+    image: nginx:1.25
+    ports:
+    - containerPort: 80
+
+  # Adapter — converts metrics to Prometheus format
+  - name: metrics-adapter
+    image: nginx/nginx-prometheus-exporter:0.11
+    ports:
+    - containerPort: 9113
+    args:
+    - -nginx.scrape-uri=http://localhost:80/nginx_status

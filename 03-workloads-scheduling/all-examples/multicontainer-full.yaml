@@ -1,0 +1,97 @@
+# ─────────────────────────────────────────────────────────
+# FULL MULTI-CONTAINER POD
+# Init containers + multiple sidecars + shared volumes
+# ─────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Pod
+metadata:
+  name: full-multi-container-pod
+  labels:
+    app: myapp
+    version: "1.0"
+spec:
+  # ── Init Containers (run before main containers) ─────────
+  # They run sequentially; all must complete before containers start
+  initContainers:
+  - name: init-check-service
+    image: busybox:1.36
+    command: ['sh', '-c',
+      'until nslookup myservice; do echo "waiting for service..."; sleep 2; done; echo "Service is up!"']
+
+  - name: init-prepare-volume
+    image: busybox:1.36
+    command: ['sh', '-c', 'echo "app started at $(date)" > /shared/init.log']
+    volumeMounts:
+    - name: app-data
+      mountPath: /shared
+
+  # ── Main Containers (all run in parallel after inits) ─────
+  containers:
+  # Primary Application
+  - name: app
+    image: nginx:1.25
+    ports:
+    - containerPort: 80
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "300m"
+        memory: "256Mi"
+    volumeMounts:
+    - name: app-data
+      mountPath: /app/data
+    - name: app-logs
+      mountPath: /var/log/nginx
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 80
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    readinessProbe:
+      httpGet:
+        path: /
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+
+  # Sidecar 1: Log Shipper
+  - name: log-shipper
+    image: busybox
+    command: ['sh', '-c', 'tail -F /logs/access.log 2>/dev/null || sleep infinity']
+    volumeMounts:
+    - name: app-logs
+      mountPath: /logs
+      readOnly: true
+    resources:
+      requests:
+        cpu: "10m"
+        memory: "16Mi"
+      limits:
+        cpu: "50m"
+        memory: "32Mi"
+
+  # Sidecar 2: Monitoring Adapter
+  - name: metrics-exporter
+    image: busybox
+    command: ['sh', '-c', 'while true; do echo "metrics ok"; sleep 30; done']
+    ports:
+    - containerPort: 9113
+    resources:
+      requests:
+        cpu: "10m"
+        memory: "16Mi"
+      limits:
+        cpu: "50m"
+        memory: "32Mi"
+
+  # ── Shared Volumes ────────────────────────────────────────
+  volumes:
+  - name: app-data
+    emptyDir: {}
+  - name: app-logs
+    emptyDir: {}
+
+  restartPolicy: Always

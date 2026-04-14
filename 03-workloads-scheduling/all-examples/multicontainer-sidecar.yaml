@@ -1,0 +1,34 @@
+# ─────────────────────────────────────────────────────────
+# SIDECAR PATTERN — App + Log Shipper
+# Containers share a volume; app writes logs, sidecar ships them
+# ─────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-with-log-sidecar
+  labels:
+    app: web
+    pattern: sidecar
+spec:
+  containers:
+  # Main application
+  - name: app
+    image: nginx:1.25
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: shared-logs
+      mountPath: /var/log/nginx    # App writes logs here
+
+  # Sidecar: reads and ships logs
+  - name: log-sidecar
+    image: busybox
+    command: ['sh', '-c', 'tail -F /logs/access.log 2>/dev/null || while true; do sleep 30; done']
+    volumeMounts:
+    - name: shared-logs
+      mountPath: /logs             # Reads from same shared volume
+      readOnly: true
+
+  volumes:
+  - name: shared-logs
+    emptyDir: {}
