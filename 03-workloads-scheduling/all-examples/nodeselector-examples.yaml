@@ -1,0 +1,175 @@
+# ============================================================
+# NodeSelector Examples — CKA 2026 Certification
+# ============================================================
+
+# ── Example 1: Basic Pod with nodeSelector ──────────────────
+# Schedule only on nodes labeled disk=ssd
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-on-ssd
+  labels:
+    app: nginx
+spec:
+  nodeSelector:
+    disk: ssd
+  containers:
+    - name: nginx
+      image: nginx:1.25
+      ports:
+        - containerPort: 80
+---
+# ── Example 2: Multiple Labels (AND logic) ──────────────────
+# Node must match ALL labels: gpu=true AND disk=ssd
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ml-training-pod
+  labels:
+    app: ml-training
+    team: data-science
+spec:
+  nodeSelector:
+    gpu: "true"
+    disk: ssd
+    env: production
+  containers:
+    - name: trainer
+      image: tensorflow/tensorflow:2.13.0-gpu
+      resources:
+        limits:
+          nvidia.com/gpu: "1"
+---
+# ── Example 3: Deployment with nodeSelector ─────────────────
+# All 3 postgres replicas go to SSD nodes only
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-db
+  labels:
+    app: postgres
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      nodeSelector:
+        disk: ssd
+        env: production
+      containers:
+        - name: postgres
+          image: postgres:15
+          env:
+            - name: POSTGRES_DB
+              value: myapp
+            - name: POSTGRES_USER
+              value: admin
+            - name: POSTGRES_PASSWORD
+              value: secret
+---
+# ── Example 4: Built-in label (OS/Architecture) ─────────────
+# Run only on Linux nodes using Kubernetes built-in labels
+apiVersion: v1
+kind: Pod
+metadata:
+  name: linux-only-pod
+spec:
+  nodeSelector:
+    kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+  containers:
+    - name: app
+      image: busybox
+      command: ["sleep", "3600"]
+---
+# ── Example 5: Zone-specific Pod ────────────────────────────
+# Data residency — run only in us-east-1a availability zone
+apiVersion: v1
+kind: Pod
+metadata:
+  name: zone-specific-pod
+  labels:
+    compliance: gdpr
+spec:
+  nodeSelector:
+    topology.kubernetes.io/zone: us-east-1a
+    data-classification: gdpr
+  containers:
+    - name: app
+      image: myapp:latest
+---
+# ── Example 6: DaemonSet on specific nodes only ─────────────
+# Log collector only on production nodes
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: log-collector
+  namespace: default
+  labels:
+    app: log-collector
+spec:
+  selector:
+    matchLabels:
+      app: log-collector
+  template:
+    metadata:
+      labels:
+        app: log-collector
+    spec:
+      nodeSelector:
+        env: production          # Only production nodes get this DaemonSet
+      containers:
+        - name: fluentd
+          image: fluentd:v1.16
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+      volumes:
+        - name: varlog
+          hostPath:
+            path: /var/log
+---
+# ── Example 7: Team-isolated Pod (multi-tenant) ─────────────
+apiVersion: v1
+kind: Pod
+metadata:
+  name: frontend-app
+  labels:
+    team: frontend
+spec:
+  nodeSelector:
+    team: frontend               # Only on frontend team's nodes
+  containers:
+    - name: frontend
+      image: nginx:alpine
+---
+# ── Example 8: StatefulSet with nodeSelector ────────────────
+# Kafka requires SSD + dedicated kafka nodes
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+spec:
+  serviceName: kafka
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      nodeSelector:
+        disk: ssd
+        kafka-node: "true"
+      containers:
+        - name: kafka
+          image: confluentinc/cp-kafka:7.5.0
+          ports:
+            - containerPort: 9092
