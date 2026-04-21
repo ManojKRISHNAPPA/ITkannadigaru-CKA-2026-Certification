@@ -146,7 +146,7 @@ spec:
           emptyDir: {}
 
 ---
-# ── Service: expose Prometheus within cluster ───────────────
+# ── Service: expose Prometheus via NodePort (kind hostPort: 30001) ──
 apiVersion: v1
 kind: Service
 metadata:
@@ -161,4 +161,5 @@ spec:
     - name: web
       port: 9090
       targetPort: web
-  type: ClusterIP
+      nodePort: 30001
+  type: NodePort
