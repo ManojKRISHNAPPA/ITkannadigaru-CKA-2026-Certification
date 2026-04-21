@@ -1,0 +1,26 @@
+# node-affinity-preferred.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ml-workload-3
+spec:
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 80                  # Strong preference
+          preference:
+            matchExpressions:
+              - key: gpu
+                operator: In
+                values:
+                  - "true"
+        - weight: 40                  # Weaker preference
+          preference:
+            matchExpressions:
+              - key: size
+                operator: NotIn
+                values:
+                  - small
+  containers:
+    - name: trainer
+      image: nginx
