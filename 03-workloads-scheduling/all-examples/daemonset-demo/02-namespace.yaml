@@ -1,0 +1,9 @@
+# ============================================================
+# Namespace for all monitoring components
+# ============================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    purpose: cka-daemonset-demo
