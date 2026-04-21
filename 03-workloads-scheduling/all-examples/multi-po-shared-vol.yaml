@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-with-log-sidecar
+  labels:
+    app: web
+    tier: frontend
+spec:
+  containers:
+  # ── Main Application Container ─────────────────────────
+  - name: app
+    image: nginx:1.25
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: shared-logs
+      mountPath: /var/log/nginx   # App writes logs here
+
+  # ── Sidecar: Log Shipper ────────────────────────────────
+  - name: log-sidecar
+    image: busybox
+    command: ['sh', '-c', 'tail -F /logs/access.log']
+    volumeMounts:
+    - name: shared-logs
+      mountPath: /logs            # Sidecar reads from same directory
+
+  # ── Shared Volume ───────────────────────────────────────
+  volumes:
+  - name: shared-logs
+    emptyDir: {}          

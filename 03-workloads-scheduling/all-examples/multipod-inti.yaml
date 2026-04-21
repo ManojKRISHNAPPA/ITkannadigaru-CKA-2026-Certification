@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-pod
+spec:
+
+  # ✅ INIT CONTAINER
+  initContainers:
+  - name: init-setup
+    image: busybox
+    command: ['sh','-c','echo "Init completed" > /data/init.txt']
+    volumeMounts:
+    - name: shared-data
+      mountPath: /data
+
+  # ✅ MAIN + SIDECAR
+  containers:
+
+  # App Container
+  - name: app
+    image: busybox
+    command: ['sh','-c','while true; do date >> /data/app.log; sleep 5; done']
+    volumeMounts:
+    - name: shared-data
+      mountPath: /data
+
+  # Sidecar Container
+  - name: sidecar
+    image: busybox
+    command: ['sh','-c','tail -f /data/app.log']
+    volumeMounts:
+    - name: shared-data
+      mountPath: /data
+
+  # ✅ Shared Volume
+  volumes:
+  - name: shared-data
+    emptyDir: {}

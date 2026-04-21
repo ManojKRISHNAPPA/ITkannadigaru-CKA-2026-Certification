@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: multi-po
+  name: multi-po
+spec:
+  containers:
+  - image: nginx
+    name: multi-po
+
+  - name: sidecar
+    image: busybox
+    command: ['sh', '-c', 'echo Hello from the sidecar container! && sleep 3600']
