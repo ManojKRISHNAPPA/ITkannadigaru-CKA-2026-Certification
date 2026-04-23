@@ -209,7 +209,7 @@ spec:
           emptyDir: {}
 
 ---
-# ── Service: expose Grafana within cluster ───────────────────
+# ── Service: expose Grafana via NodePort (kind hostPort: 30000) ──
 apiVersion: v1
 kind: Service
 metadata:
@@ -224,4 +224,5 @@ spec:
     - name: http
       port: 3000
       targetPort: http
-  type: ClusterIP
+      nodePort: 30000
+  type: NodePort
