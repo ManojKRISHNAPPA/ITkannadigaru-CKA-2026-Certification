@@ -18,6 +18,16 @@
 
 ---
 
+```
+kubectl patch deployment metrics-server -n kube-system \
+--type='json' \
+-p='[
+{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-preferred-address-types=InternalIP"},
+{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}
+]'
+
+```
+
 ## 1. What are Requests and Limits?
 
 **Requests** and **Limits** are the two resource knobs on every container in Kubernetes.

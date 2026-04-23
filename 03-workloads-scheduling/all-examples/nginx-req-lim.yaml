@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: nginx-req-lim
+  name: nginx-req-lim
+spec:
+  containers:
+  - image: nginx
+    name: nginx-req-lim
+    resources: 
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi     
+

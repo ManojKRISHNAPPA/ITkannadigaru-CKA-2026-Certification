@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: payment-service
+spec:
+  priorityClassName: system-node-critical    # Reference by name
+  containers:
+    - name: payment
+      image: nginx
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "256Mi"
+        limits:
+          cpu: "1"
+          memory: "512Mi"
