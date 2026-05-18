@@ -1,0 +1,43 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: apache-route
+  namespace: default
+spec:
+  hostnames:
+    - "a16283feec7dd487f846801911f3f0b6-1584455274.ap-northeast-1.elb.amazonaws.com"
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: nginx-gateway
+      namespace: default
+  rules:
+    # Rule 1: /app-1 → apache-service (strips prefix before forwarding)
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /app-1
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: apache-service
+          port: 80
+
+    # Rule 2: /app-2 → nginx-service (strips prefix before forwarding)
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /app-2
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: nginx-service
+          port: 80
