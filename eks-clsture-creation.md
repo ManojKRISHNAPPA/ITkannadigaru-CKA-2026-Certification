@@ -56,7 +56,7 @@ You can follow same procedure in the official  AWS document [Getting started wit
    example:
    eksctl create cluster --name itkannadigaru \
    --region ap-northeast-1 \
-   --node-type t2.small \
+   --node-type t2.medium \
     ```
 
 6. To delete the EKS clsuter 
