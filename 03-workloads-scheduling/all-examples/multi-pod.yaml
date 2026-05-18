@@ -4,6 +4,7 @@ metadata:
   labels:
     run: multi-po
   name: multi-po
+  namespace: test
 spec:
   containers:
   - image: nginx

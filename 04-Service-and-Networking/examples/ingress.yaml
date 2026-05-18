@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-ingress
+spec:
+  rules:
+  - host: itkannadigaru.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: svc1
+            port:
+              number: 8080
+        path: /app-1
+        pathType: Exact
+      - backend:
+          service:
+            name: svc2
+            port:
+              number: 8080
+        path: /app-2
+        pathType: Exact

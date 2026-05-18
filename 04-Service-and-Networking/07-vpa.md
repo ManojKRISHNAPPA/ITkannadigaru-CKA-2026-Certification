@@ -421,15 +421,22 @@ spec:
     spec:
       containers:
       - name: hamster
-        image: registry.k8s.io/ubuntu-slim:0.1
+        image: polinux/stress
         resources:
           requests:
-            cpu: 100m          # intentionally low — VPA will suggest higher
+            cpu: 50m
             memory: 50Mi
         command:
-        - /bin/sh
-        - -c
-        - "while true; do timeout 0.5s yes > /dev/null; sleep 0.5s; done"
+        - stress
+        args:
+        - "--cpu"
+        - "1"
+        - "--vm"
+        - "1"
+        - "--vm-bytes"
+        - "200M"
+        - "--timeout"
+        - "600s"
 EOF
 
 kubectl rollout status deployment/hamster

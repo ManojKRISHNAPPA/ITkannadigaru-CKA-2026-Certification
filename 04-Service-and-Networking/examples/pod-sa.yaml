@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: test-pod-sa
+  name: test-pod-sa
+spec:
+  serviceAccountName: itk-sa
+  containers:
+  - name: test-pod-sa
+    image: nginx
