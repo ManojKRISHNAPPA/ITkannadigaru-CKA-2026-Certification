@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-pod
+spec:
+  volumes:
+  - name: secret-volume
+    secret:
+      secretName: db-creds
+      defaultMode: 0400            # read-only for owner (secure file permission)
+
+  containers:
+  - name: app
+    image: my-ecomm-app:1.0
+    volumeMounts:
+    - name: secret-volume
+      mountPath: /etc/secrets
+      readOnly: true
