@@ -1,0 +1,35 @@
+# Production ConfigMap for e-commerce order-service
+# Stores non-sensitive configuration only
+# Namespace: ecomm-prod
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: ecomm-prod
+  labels:
+    app: order-service
+    env: production
+data:
+  # Database (host/port only — password goes in Secret)
+  DB_HOST: "postgres.ecomm-prod.svc.cluster.local"
+  DB_PORT: "5432"
+  DB_NAME: "ecomm_production"
+
+  # Redis Cache
+  REDIS_HOST: "redis.ecomm-prod.svc.cluster.local"
+  REDIS_PORT: "6379"
+
+  # Internal Service Endpoints
+  API_BASE_URL: "https://api.ecomm.internal/v2"
+  AUTH_SERVICE_URL: "https://auth.ecomm.internal/v1"
+  PAYMENT_GW_URL: "https://payments.ecomm.internal/v3"
+  INVENTORY_SVC_URL: "https://inventory.ecomm.internal/v1"
+  NOTIFICATION_URL: "https://notify.ecomm.internal/v1"
+
+  # App Behaviour
+  APP_ENV: "production"
+  LOG_LEVEL: "INFO"
+  MAX_DB_CONNECTIONS: "20"
+  CACHE_TTL_SECONDS: "3600"
+  REQUEST_TIMEOUT_MS: "5000"
+  FEATURE_NEW_CART: "true"

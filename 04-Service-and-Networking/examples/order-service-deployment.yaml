@@ -1,0 +1,96 @@
+# Full production deployment — order-service
+# Injects ConfigMap + Secret as env vars
+# Mounts TLS cert as volume
+# Namespace: ecomm-prod
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: ecomm-prod
+  labels:
+    app: order-service
+    version: "2.1.0"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+        version: "2.1.0"
+    spec:
+      containers:
+      - name: order-service
+        image: my-ecomm/order-service:2.1.0
+        ports:
+        - containerPort: 8080
+
+        # Inject all keys from ConfigMap (non-sensitive) and Secret (sensitive)
+        envFrom:
+        - configMapRef:
+            name: app-config       # DB_HOST, REDIS_HOST, API URLs, LOG_LEVEL...
+        - secretRef:
+            name: app-secrets      # DB_PASSWORD, JWT_SECRET, STRIPE_KEY...
+
+        # Explicitly expose DB_CONNECTION_STRING with a different env var name
+        env:
+        - name: PORT
+          value: "8080"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: DB_CONNECTION_STRING
+
+        # Mount TLS cert as read-only volume
+        volumeMounts:
+        - name: tls-certs
+          mountPath: /etc/tls
+          readOnly: true
+
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3
+
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 3
+
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+
+      volumes:
+      - name: tls-certs
+        secret:
+          secretName: app-tls-cert   # created via: kubectl create secret tls ...
+          defaultMode: 0400          # owner read-only (secure)
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: ecomm-prod
+spec:
+  selector:
+    app: order-service
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: ClusterIP
