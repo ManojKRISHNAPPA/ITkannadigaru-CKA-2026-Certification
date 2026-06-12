@@ -175,6 +175,20 @@ kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.0/
 kubectl get nodes -w
 ```
 
+### Check the pod:
+```
+root@kubeadm-controlplane:~# kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+node/kubeadm-controlplane untainted
+root@kubeadm-controlplane:~# kubectl run nginx --image=nginx
+pod/nginx created
+root@kubeadm-controlplane:~# kubectl get pods
+NAME    READY   STATUS              RESTARTS   AGE
+nginx   0/1     ContainerCreating   0          5s
+root@kubeadm-controlplane:~# kubectl get pods
+NAME    READY   STATUS    RESTARTS   AGE
+nginx   1/1     Running   0          8s
+```
+
 ### Save the Join Command
 
 ```bash
