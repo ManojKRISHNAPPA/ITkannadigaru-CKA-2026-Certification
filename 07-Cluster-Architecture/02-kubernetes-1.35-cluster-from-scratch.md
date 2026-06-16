@@ -1,7 +1,20 @@
 # Kubernetes 1.35 — Cluster From Scratch (The Hard Way)
 
-> CKA 2026 Course — Cluster Architecture, Installation & Configuration
+> CKA 2026 Course — ITKannadigaru | Cluster Architecture, Installation & Configuration
 > Kubernetes Version: **v1.35.x** | Method: **100% Manual — No kubeadm**
+
+---
+
+## Reference Links — Changelogs & Releases
+
+| Component | Changelog / Release Page |
+|-----------|--------------------------|
+| Kubernetes v1.35 | https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.35.md |
+| etcd releases | https://github.com/etcd-io/etcd/releases/tag/v3.5.18 |
+| containerd releases | https://github.com/containerd/containerd/releases |
+| Calico releases | https://github.com/projectcalico/calico/releases/tag/v3.29.1 |
+| CoreDNS releases | https://github.com/coredns/coredns/releases/tag/v1.12.0 |
+| CNI Plugins releases | https://github.com/containernetworking/plugins/releases |
 
 ---
 
@@ -41,9 +54,9 @@
 
 ```
 Kubernetes:  v1.35.0
-etcd:        v3.5.17
+etcd:        v3.5.18
 containerd:  v2.0.4
-Calico CNI:  v3.29.0
+Calico CNI:  v3.29.1
 CoreDNS:     v1.12.0
 pause image: registry.k8s.io/pause:3.10
 ```
@@ -226,12 +239,12 @@ sudo systemctl status containerd --no-pager
 
 ```bash
 export K8S_VERSION="v1.35.0"
-export ETCD_VERSION="v3.5.17"
+export ETCD_VERSION="v3.5.18"
 export ARCH="amd64"
 
 # Add to ~/.bashrc so these persist across sessions
 echo "export K8S_VERSION=v1.35.0" >> ~/.bashrc
-echo "export ETCD_VERSION=v3.5.17" >> ~/.bashrc
+echo "export ETCD_VERSION=v3.5.18" >> ~/.bashrc
 echo "export ARCH=amd64" >> ~/.bashrc
 ```
 
@@ -271,7 +284,7 @@ kubelet --version
 kube-apiserver --version
 ```
 
-### Download etcd v3.5.17
+### Download etcd v3.5.18
 
 ```bash
 cd ~/k8s-binaries
@@ -691,15 +704,14 @@ ls -la /etc/etcd/
 # etcd.crt  etcd.key  ca.crt
 ```
 
-### Sub-Step 3: Copy etcd Binaries to PATH
+### Sub-Step 3: Verify etcd Binaries Are in PATH
+
+etcd was already installed to `/usr/local/bin/` during Step 1. Confirm both binaries are available:
 
 ```bash
-cd /root/binaries/etcd-v3.5.18-linux-amd64/
-cp etcd etcdctl /usr/local/bin/
-
-# Verify versions
 etcd --version
 etcdctl version
+# Expected: etcd Version: 3.5.18 / API version: 3.5
 ```
 
 ### Sub-Step 4: Create etcd systemd Service File
@@ -758,9 +770,9 @@ ETCDCTL_API=3 etcdctl \
   --cacert=/etc/etcd/ca.crt \
   --cert=/etc/etcd/etcd.crt \
   --key=/etc/etcd/etcd.key \
-  put course "kplabs cka course is awesome"
+  put course "itk cka course is awesome"
 
-# Read it back — should return "kplabs cka course is awesome"
+# Read it back — should return "itk cka course is awesome"
 ETCDCTL_API=3 etcdctl \
   --endpoints=https://127.0.0.1:2379 \
   --cacert=/etc/etcd/ca.crt \
@@ -1366,11 +1378,11 @@ kubectl get nodes -o wide
 
 Without a CNI (Container Network Interface) plugin, pods cannot reach each other. The node will stay `NotReady` until CNI is installed.
 
-### Install Calico v3.29 (Operator Method)
+### Install Calico v3.29.1 (Operator Method)
 
 ```bash
 # Install the Tigera Calico operator
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.0/manifests/tigera-operator.yaml
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.1/manifests/tigera-operator.yaml
 
 # Wait for the operator pod to be running
 kubectl get pods -n tigera-operator -w
@@ -1401,7 +1413,7 @@ kubectl get nodes -w
 ### Alternative: Calico Manifest Method (simpler for single-node)
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.0/manifests/calico.yaml
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.1/manifests/calico.yaml
 
 kubectl rollout status daemonset/calico-node -n kube-system
 ```
@@ -2983,11 +2995,11 @@ sudo crictl --runtime-endpoint unix:///var/run/cri-dockerd.sock images
 │ kube-proxy               │ v1.35.0                   │
 │ kubectl                  │ v1.35.0                   │
 ├──────────────────────────┼───────────────────────────┤
-│ etcd                     │ v3.5.17                   │
+│ etcd                     │ v3.5.18                   │
 │ containerd               │ v2.0.4                    │
 │ pause image              │ registry.k8s.io/pause:3.10│
 ├──────────────────────────┼───────────────────────────┤
-│ Calico CNI               │ v3.29.0                   │
+│ Calico CNI               │ v3.29.1                   │
 │ CoreDNS                  │ v1.12.0                   │
 └──────────────────────────┴───────────────────────────┘
 
